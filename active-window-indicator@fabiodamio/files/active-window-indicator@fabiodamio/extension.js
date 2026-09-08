@@ -71,7 +71,7 @@ function interpolateColor(c1, c2, factor) {
 
 function startAnimLoop() {
     if (animLoopId) return;
-    
+
     animLoopId = Mainloop.timeout_add(33, () => {
         let animSpeed = 5;
         if (settings) {
@@ -127,10 +127,10 @@ function drawTrapezoid(canvasActor, cr, width, height) {
     let alpha = alphaPercent / 100.0;
     let slant = Math.min(slantPixels, width / 2);
 
-    cr.moveTo(0, 0);                    
-    cr.lineTo(width, 0);                    
-    cr.lineTo(width - slant, height); 
-    cr.lineTo(slant, height);         
+    cr.moveTo(0, 0);
+    cr.lineTo(width, 0);
+    cr.lineTo(width - slant, height);
+    cr.lineTo(slant, height);
     cr.closePath();
 
     let pattern = new Cairo.LinearGradient(0, 0, width, 0);
@@ -163,13 +163,13 @@ function updateIndicator() {
     let focusWindow = global.display.focus_window;
     let activeWorkspace = global.workspace_manager.get_active_workspace();
 
-    if (!focusWindow || 
-        focusWindow.is_override_redirect() || 
+    if (!focusWindow ||
+        focusWindow.is_override_redirect() ||
         focusWindow.is_fullscreen() ||
         focusWindow.minimized ||
         focusWindow.window_type !== Meta.WindowType.NORMAL ||
         !focusWindow.located_on_workspace(activeWorkspace)) {
-        
+
         if (indicator && indicator.visible) {
             indicator.ease({
                 opacity: 0,
@@ -180,7 +180,7 @@ function updateIndicator() {
         }
         return;
     }
-    
+
     let rect = focusWindow.get_frame_rect();
 
     let lineHeight = 6;
@@ -202,7 +202,7 @@ function updateIndicator() {
     // Controlla se c'è un'altra finestra normale che copre specificamente la nostra barra
     let windows = global.get_window_actors().map(w => w.meta_window);
     let isCovered = false;
-    
+
     let ourIndex = windows.indexOf(focusWindow);
     if (ourIndex !== -1) {
         for (let i = ourIndex + 1; i < windows.length; i++) {
@@ -212,7 +212,7 @@ function updateIndicator() {
             }
             if (win.located_on_workspace(activeWorkspace)) {
                 let winRect = win.get_frame_rect();
-                
+
                 // Una finestra copre la barra se:
                 // 1. Si sovrappone orizzontalmente alla barra [barX1, barX2]
                 // 2. Si estende verticalmente coprendo la coordinata della barra (barY si trova tra la cima e il fondo della finestra sopra)
@@ -228,7 +228,7 @@ function updateIndicator() {
         }
     }
 
-    // Se la finestra è coperta, nascondiamo la barra e pianifichiamo un controllo a breve 
+    // Se la finestra è coperta, nascondiamo la barra e pianifichiamo un controllo a breve
     // per intercettare il momento in cui sale in primo piano dopo il clic (fondamentale per sloppy).
     if (isCovered) {
         if (indicator && indicator.visible) {
@@ -239,12 +239,12 @@ function updateIndicator() {
                 onComplete: () => { indicator.hide(); }
             });
         }
-        
+
         Mainloop.timeout_add(200, () => {
             updateIndicator();
             return false;
         });
-        
+
         return;
     }
 
@@ -252,7 +252,7 @@ function updateIndicator() {
         canvas = new Clutter.Canvas();
         canvas.connect('draw', drawTrapezoid);
     }
-    
+
     // Assegnazione forzata delle dimensioni aggiornate al canvas e all'indicatore
     canvas.set_size(barWidth, lineHeight);
 
@@ -268,9 +268,9 @@ function updateIndicator() {
 
     indicator.set_position(rect.x + offsetX, rect.y);
     indicator.set_size(barWidth, lineHeight);
-    
+
     canvas.invalidate();
-    
+
     indicator.show();
     indicator.raise_top();
     indicator.ease({
@@ -288,7 +288,7 @@ function onFocusChanged() {
         currentWindow = focusWindow;
         positionSignal = currentWindow.connect('position-changed', updateIndicator);
         sizeSignal = currentWindow.connect('size-changed', updateIndicator);
-        
+
         try {
             stateSignal = currentWindow.connect('window-state-changed', () => {
                 updateIndicator();
@@ -318,7 +318,7 @@ function enable() {
 
     focusSignal = global.display.connect('notify::focus-window', onFocusChanged);
     workspaceSignal = global.workspace_manager.connect('active-workspace-changed', updateIndicator);
-    
+
     if (Main.overview) {
         overviewOpenId = Main.overview.connect('showing', () => {
             if (indicator && indicator.visible) {
@@ -349,7 +349,7 @@ function disable() {
         global.display.disconnect(focusSignal);
         focusSignal = null;
     }
-    
+
     if (workspaceSignal) {
         global.workspace_manager.disconnect(workspaceSignal);
         workspaceSignal = null;
@@ -372,7 +372,7 @@ function disable() {
         indicator.destroy();
         indicator = null;
     }
-    
+
     canvas = null;
     settings = null;
 }
